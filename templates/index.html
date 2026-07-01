@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Royal Road → EPUB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F3ECE0;
+    --paper-dark: #E7DCC7;
+    --ink: #2B2420;
+    --ink-soft: #6b6153;
+    --brick: #8C3B2E;
+    --brick-dark: #6f2e24;
+    --green: #3F5D4E;
+    --rule: #C9BBA0;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    background-image:
+      radial-gradient(circle at 15% 0%, rgba(140,59,46,0.05), transparent 45%),
+      radial-gradient(circle at 90% 100%, rgba(63,93,78,0.06), transparent 40%);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 48px 20px 80px;
+  }
+
+  .wrap { width: 100%; max-width: 640px; }
+
+  .stamp {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 10px;
+  }
+  .stamp h1 {
+    font-family: 'Fraunces', serif;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .stamp .arrow { color: var(--brick); }
+  .stamp small {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .card {
+    background: #FBF8F1;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 28px;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.03), 0 12px 30px -18px rgba(43,36,32,0.35);
+    position: relative;
+    margin-bottom: 20px;
+  }
+  .card::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 22px; bottom: 22px;
+    width: 3px;
+    background: var(--brick);
+    border-radius: 0 2px 2px 0;
+  }
+
+  label {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+
+  input[type=text], input[type=email], input[type=password], input[type=number] {
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    padding: 10px 12px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: #fff;
+    color: var(--ink);
+    margin-bottom: 18px;
+  }
+  input:focus {
+    outline: 2px solid var(--green);
+    outline-offset: 1px;
+  }
+  input:disabled {
+    background: var(--paper-dark);
+    color: var(--ink-soft);
+  }
+
+  .field-row { display: flex; gap: 14px; }
+  .field-row > div { flex: 1; }
+
+  .login-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    margin: -6px 0 18px;
+    user-select: none;
+  }
+  .login-toggle svg { transition: transform 0.15s ease; width: 10px; }
+  .login-toggle.open svg { transform: rotate(90deg); }
+
+  .login-fields {
+    display: none;
+    border-left: 2px solid var(--rule);
+    padding-left: 14px;
+    margin-bottom: 6px;
+  }
+  .login-fields.open { display: block; }
+  .login-note {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    margin: 0 0 14px;
+  }
+
+  button.submit {
+    width: 100%;
+    background: var(--brick);
+    color: #FBF8F1;
+    border: none;
+    padding: 13px 18px;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 16px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  button.submit:hover { background: var(--brick-dark); }
+  button.submit:disabled { background: #C9B9A9; cursor: not-allowed; }
+
+  button.link-btn {
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+    margin-top: 14px;
+  }
+
+  .hint {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+
+  /* ---- Fiction summary card (stage 2) ---- */
+  .fiction-summary {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 22px;
+  }
+  .fiction-summary img {
+    width: 84px;
+    height: 118px;
+    object-fit: cover;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: var(--paper-dark);
+    flex-shrink: 0;
+  }
+  .fiction-summary .meta { min-width: 0; }
+  .book-title {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 2px;
+  }
+  .book-author {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: 0 0 10px;
+  }
+  .chapter-count-badge {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--paper-dark);
+    border-radius: 20px;
+    padding: 4px 12px;
+  }
+  .chapter-count-badge b { font-size: 14px; color: var(--brick); }
+  .login-badge {
+    display: inline-block;
+    margin-top: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--green);
+  }
+
+  fieldset {
+    border: none;
+    padding: 0;
+    margin: 0 0 18px;
+  }
+  fieldset legend {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+    padding: 0;
+  }
+  .range-hint {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin: -12px 0 16px;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1.5;
+  }
+  .range-hint span { color: var(--ink); }
+
+  .toggle-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--paper-dark);
+  }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle-row input[type=checkbox] {
+    margin: 3px 0 0;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--brick);
+    flex-shrink: 0;
+  }
+  .toggle-row .toggle-text { flex: 1; }
+  .toggle-row .toggle-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    display: block;
+  }
+  .toggle-row .toggle-desc {
+    font-size: 12px;
+    color: var(--ink-soft);
+    display: block;
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+  .toggle-row.warn .toggle-title { color: var(--brick-dark); }
+
+  .delay-inline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .delay-inline input[type=number] { margin-bottom: 0; max-width: 90px; }
+  .delay-inline label { margin-bottom: 0; white-space: nowrap; }
+
+  .status-block { display: none; }
+  .status-block.active { display: block; }
+
+  .ribbon {
+    height: 8px;
+    background: var(--paper-dark);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .ribbon-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--green), var(--brick));
+    transition: width 0.3s ease;
+  }
+  .ribbon-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+
+  .log {
+    background: #221E1A;
+    color: #E8DFC9;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    border-radius: 2px;
+    padding: 14px 16px;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+  .log div { opacity: 0.85; }
+  .log div:last-child { opacity: 1; color: #fff; }
+
+  .error-box {
+    background: #FBEAE6;
+    border: 1px solid var(--brick);
+    color: var(--brick-dark);
+    font-size: 13px;
+    padding: 12px 14px;
+    border-radius: 2px;
+    margin-top: 16px;
+    display: none;
+  }
+  .error-box.active { display: block; }
+
+  .download-row { margin-top: 20px; display: none; }
+  .download-row.active { display: block; }
+  a.download-btn {
+    display: inline-block;
+    background: var(--green);
+    color: #FBF8F1;
+    text-decoration: none;
+    padding: 12px 20px;
+    border-radius: 2px;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .stage { display: none; }
+  .stage.active { display: block; }
+
+  footer {
+    max-width: 640px;
+    margin: 26px auto 0;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="stamp">
+    <h1>Royal Road <span class="arrow">→</span> EPUB</h1>
+    <small>Est. reading room</small>
+  </div>
+
+  <!-- STAGE 1: URL + optional login -->
+  <div class="card stage active" id="stage-1">
+    <form id="preview-form">
+      <label for="url">Fiction URL</label>
+      <input type="text" id="url" name="url" placeholder="https://www.royalroad.com/fiction/12345/your-story" required>
+
+      <div class="login-toggle" id="login-toggle">
+        <svg viewBox="0 0 8 8" fill="none"><path d="M1 1L7 4L1 7" stroke="currentColor" stroke-width="1.5"/></svg>
+        Log in (only needed for chapters your account already has access to)
+      </div>
+      <div class="login-fields" id="login-fields">
+        <p class="login-note">
+          Credentials are sent straight to royalroad.com to create a session and are held in memory only for
+          this session — never written to disk or logged. Use your own account, and only for content
+          you're already entitled to read.
+        </p>
+        <div class="field-row">
+          <div>
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" autocomplete="username">
+          </div>
+          <div>
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" autocomplete="current-password">
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="submit" id="preview-btn">Look Up Fiction</button>
+      <p class="hint">
+        This loads the table of contents and cover, so you can see the chapter count and pick a range
+        before anything downloads.
+      </p>
+    </form>
+    <div class="error-box" id="preview-error"></div>
+  </div>
+
+  <!-- STAGE 2: fiction summary + range + options -->
+  <div class="card stage" id="stage-2">
+    <div class="fiction-summary">
+      <img id="cover-img" src="" alt="Cover" style="display:none;">
+      <div class="meta">
+        <p class="book-title" id="book-title">—</p>
+        <p class="book-author" id="book-author"></p>
+        <div class="chapter-count-badge">Total chapters: <b id="total-chapters">0</b></div>
+        <div class="login-badge" id="login-badge" style="display:none;">✓ Logged in for this session</div>
+      </div>
+    </div>
+
+    <form id="convert-form">
+      <fieldset>
+        <legend>Chapter range</legend>
+        <div class="field-row">
+          <div>
+            <label for="start-chapter">From #</label>
+            <input type="number" id="start-chapter" name="start" min="1" value="1">
+          </div>
+          <div>
+            <label for="end-chapter">To #</label>
+            <input type="number" id="end-chapter" name="end" min="1" value="1">
+          </div>
+        </div>
+        <p class="range-hint" id="range-hint"></p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Options</legend>
+        <div class="toggle-row">
+          <input type="checkbox" id="include-cover" checked>
+          <div class="toggle-text">
+            <span class="toggle-title">Use novel cover as EPUB cover</span>
+            <span class="toggle-desc">Downloads the cover image shown above and embeds it in the file.</span>
+          </div>
+        </div>
+        <div class="toggle-row" id="description-row">
+          <input type="checkbox" id="include-description" checked>
+          <div class="toggle-text">
+            <span class="toggle-title">Add the description as an introductory chapter</span>
+            <span class="toggle-desc">Inserts the novel's synopsis as "Synopsis" before chapter 1.</span>
+          </div>
+        </div>
+        <div class="toggle-row warn">
+          <input type="checkbox" id="disable-delay">
+          <div class="toggle-text">
+            <span class="toggle-title">Disable delay between chapters</span>
+            <span class="toggle-desc">
+              Fetches chapters back-to-back with no pacing. Not recommended — this is harder on
+              RoyalRoad's servers. The tool will still back off automatically if the server asks it to slow down.
+            </span>
+            <div class="delay-inline" id="delay-inline">
+              <label for="min-delay" style="margin:0;">Delay (seconds):</label>
+              <input type="number" id="min-delay" min="0" step="0.5" value="3">
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
+      <button type="submit" class="submit" id="submit-btn">Bind This Book</button>
+      <button type="button" class="link-btn" id="back-btn">← Look up a different fiction</button>
+    </form>
+
+    <div class="error-box" id="error-box"></div>
+
+    <div class="status-block" id="status-block">
+      <div class="ribbon"><div class="ribbon-fill" id="ribbon-fill"></div></div>
+      <div class="ribbon-label"><span id="progress-text">0 / 0 chapters</span><span id="status-text">starting…</span></div>
+      <div class="log" id="log"></div>
+      <div class="download-row" id="download-row">
+        <a class="download-btn" id="download-link" href="#">Download EPUB</a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Personal-use tool. Please respect RoyalRoad's Terms of Service — only convert fictions you have the right
+    to read, and don't redistribute the resulting file.
+  </footer>
+</div>
+
+<script>
+const stage1 = document.getElementById('stage-1');
+const stage2 = document.getElementById('stage-2');
+
+const previewForm = document.getElementById('preview-form');
+const previewBtn = document.getElementById('preview-btn');
+const previewError = document.getElementById('preview-error');
+const loginToggle = document.getElementById('login-toggle');
+const loginFields = document.getElementById('login-fields');
+
+const coverImg = document.getElementById('cover-img');
+const bookTitle = document.getElementById('book-title');
+const bookAuthor = document.getElementById('book-author');
+const totalChaptersEl = document.getElementById('total-chapters');
+const loginBadge = document.getElementById('login-badge');
+const descriptionRow = document.getElementById('description-row');
+
+const startInput = document.getElementById('start-chapter');
+const endInput = document.getElementById('end-chapter');
+const rangeHint = document.getElementById('range-hint');
+
+const disableDelayCheckbox = document.getElementById('disable-delay');
+const delayInline = document.getElementById('delay-inline');
+const minDelayInput = document.getElementById('min-delay');
+
+const convertForm = document.getElementById('convert-form');
+const submitBtn = document.getElementById('submit-btn');
+const backBtn = document.getElementById('back-btn');
+const statusBlock = document.getElementById('status-block');
+const errorBox = document.getElementById('error-box');
+const ribbonFill = document.getElementById('ribbon-fill');
+const progressText = document.getElementById('progress-text');
+const statusText = document.getElementById('status-text');
+const logEl = document.getElementById('log');
+const downloadRow = document.getElementById('download-row');
+const downloadLink = document.getElementById('download-link');
+
+let previewId = null;
+let chapterTitles = [];
+let pollTimer = null;
+
+loginToggle.addEventListener('click', () => {
+  loginToggle.classList.toggle('open');
+  loginFields.classList.toggle('open');
+});
+
+disableDelayCheckbox.addEventListener('change', () => {
+  const disabled = disableDelayCheckbox.checked;
+  minDelayInput.disabled = disabled;
+  delayInline.style.opacity = disabled ? '0.5' : '1';
+});
+
+startInput.addEventListener('input', updateRangeHint);
+endInput.addEventListener('input', updateRangeHint);
+
+function updateRangeHint() {
+  const total = chapterTitles.length;
+  let start = parseInt(startInput.value, 10) || 1;
+  let end = parseInt(endInput.value, 10) || total;
+  start = Math.max(1, Math.min(start, total));
+  end = Math.max(1, Math.min(end, total));
+  const startTitle = chapterTitles[start - 1] || '';
+  const endTitle = chapterTitles[end - 1] || '';
+  const count = Math.max(0, end - start + 1);
+  rangeHint.innerHTML = count > 0
+    ? `<span>${count} chapter(s)</span> selected — from "${escapeHtml(startTitle)}" to "${escapeHtml(endTitle)}"`
+    : 'Invalid range';
+}
+
+previewForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  previewError.classList.remove('active');
+  previewBtn.disabled = true;
+  previewBtn.textContent = 'Looking up…';
+
+  const payload = {
+    url: document.getElementById('url').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    password: document.getElementById('password').value,
+  };
+
+  try {
+    const res = await fetch('/api/preview', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      previewError.textContent = data.error || 'Could not load that fiction.';
+      previewError.classList.add('active');
+      previewBtn.disabled = false;
+      previewBtn.textContent = 'Look Up Fiction';
+      return;
+    }
+
+    previewId = data.preview_id;
+    chapterTitles = data.chapter_titles || [];
+
+    bookTitle.textContent = data.title;
+    bookAuthor.textContent = data.author ? `by ${data.author}` : '';
+    totalChaptersEl.textContent = data.total_chapters;
+    if (data.cover_url) {
+      coverImg.src = data.cover_url;
+      coverImg.style.display = 'block';
+    } else {
+      coverImg.style.display = 'none';
+    }
+    loginBadge.style.display = data.logged_in ? 'inline-block' : 'none';
+
+    document.getElementById('include-cover').checked = !!data.cover_url;
+    document.getElementById('include-cover').disabled = !data.cover_url;
+    descriptionRow.style.display = data.has_description ? 'flex' : 'none';
+    document.getElementById('include-description').checked = !!data.has_description;
+
+    startInput.value = 1;
+    startInput.max = data.total_chapters;
+    endInput.value = data.total_chapters;
+    endInput.max = data.total_chapters;
+    updateRangeHint();
+
+    resetConvertUI();
+    stage1.classList.remove('active');
+    stage2.classList.add('active');
+  } catch (err) {
+    previewError.textContent = 'Could not reach the server: ' + err.message;
+    previewError.classList.add('active');
+  } finally {
+    previewBtn.disabled = false;
+    previewBtn.textContent = 'Look Up Fiction';
+  }
+});
+
+backBtn.addEventListener('click', () => {
+  if (pollTimer) clearInterval(pollTimer);
+  previewId = null;
+  stage2.classList.remove('active');
+  stage1.classList.add('active');
+});
+
+function resetConvertUI() {
+  errorBox.classList.remove('active');
+  errorBox.textContent = '';
+  downloadRow.classList.remove('active');
+  statusBlock.classList.remove('active');
+  logEl.innerHTML = '';
+  ribbonFill.style.width = '0%';
+  progressText.textContent = '0 / 0 chapters';
+  statusText.textContent = 'starting…';
+}
+
+convertForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  resetConvertUI();
+  statusBlock.classList.add('active');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Binding…';
+
+  const payload = {
+    preview_id: previewId,
+    start: parseInt(startInput.value, 10) || 1,
+    end: parseInt(endInput.value, 10) || chapterTitles.length,
+    include_cover: document.getElementById('include-cover').checked,
+    include_description: document.getElementById('include-description').checked,
+    disable_delay: disableDelayCheckbox.checked,
+    min_delay: parseFloat(minDelayInput.value) || 0,
+  };
+
+  try {
+    const res = await fetch('/api/convert', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      showError(data.error || 'Something went wrong starting the job.');
+      resetSubmit();
+      return;
+    }
+    poll(data.job_id);
+  } catch (err) {
+    showError('Could not reach the server: ' + err.message);
+    resetSubmit();
+  }
+});
+
+function showError(msg) {
+  errorBox.textContent = msg;
+  errorBox.classList.add('active');
+}
+
+function poll(jobId) {
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(async () => {
+    try {
+      const res = await fetch(`/api/status/${jobId}`);
+      const data = await res.json();
+      if (!res.ok) {
+        clearInterval(pollTimer);
+        showError(data.error || 'Lost track of this job.');
+        resetSubmit();
+        return;
+      }
+      render(jobId, data);
+      if (['done', 'error', 'cancelled'].includes(data.status)) {
+        clearInterval(pollTimer);
+        resetSubmit();
+      }
+    } catch (err) {
+      clearInterval(pollTimer);
+      showError('Lost connection while checking progress.');
+      resetSubmit();
+    }
+  }, 1200);
+}
+
+function resetSubmit() {
+  submitBtn.disabled = false;
+  submitBtn.textContent = 'Bind This Book';
+}
+
+function render(jobId, data) {
+  const total = data.total || 0;
+  const progress = data.progress || 0;
+  const pct = total ? Math.round((progress / total) * 100) : (data.status === 'starting' ? 5 : 0);
+  ribbonFill.style.width = pct + '%';
+  progressText.textContent = `${progress} / ${total || '?'} chapters`;
+  statusText.textContent = data.status;
+
+  logEl.innerHTML = (data.log || []).map(line => `<div>${escapeHtml(line)}</div>`).join('');
+  logEl.scrollTop = logEl.scrollHeight;
+
+  if (data.status === 'error') {
+    showError(data.message || 'Something went wrong during conversion.');
+  }
+  if (data.download_ready) {
+    downloadRow.classList.add('active');
+    downloadLink.href = `/api/download/${jobId}`;
+  }
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+</script>
+</body>
+</html>
